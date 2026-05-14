@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venkatesh Finance Pro - Web</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%233b8ed0' width='100' height='100' rx='10'/><text x='50' y='65' font-size='60' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>₹</text></svg>">
+    <!-- Modern Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2b2b2b;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --border-color: #333;
+            --input-bg: #2b2b2b;
+            --input-border: #444;
+            --btn-primary: #3b8ed0;
+            --btn-hover: #2a7bb5;
+            --result-bg: #000;
+            --result-text: #00ff41;
+            --result-border: #00ff41;
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        html[data-theme="light"] {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0f0f0;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --input-bg: #ffffff;
+            --input-border: #ced4da;
+            --btn-primary: #0d6efd;
+            --btn-hover: #0b5ed7;
+            --result-bg: #f8f9fa;
+            --result-text: #0d6efd;
+            --result-border: #0d6efd;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+            flex-direction: column;
+        }
+
+        .header-title {
+            text-align: center;
+            width: 100%;
+        }
+
+        .theme-toggle-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background-color: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .theme-toggle button {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle button:hover {
+            background-color: var(--btn-primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .card {
+            background-color: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px var(--shadow);
+        }
+
+        .card-header-custom {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .card-header-custom h2 {
+            color: var(--btn-primary);
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .card-header-custom p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            background-color: var(--input-bg);
+            border: 2px solid var(--input-border);
+            color: var(--text-primary);
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .form-control:focus {
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            border-color: var(--btn-primary);
+            box-shadow: 0 0 0 3px rgba(59, 142, 208, 0.1);
+        }
+
+        .form-row-custom {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 576px) {
+            .form-row-custom {
+                grid-template-columns: 1fr;
+            }
+
+            .header-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .theme-toggle-container {
+                justify-content: center;
+            }
+        }
+
+        .btn-primary {
+            background-color: var(--btn-primary);
+            border: none;
+            font-weight: 700;
+            border-radius: 10px;
+            padding: 14px 20px;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--btn-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(59, 142, 208, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .result-box {
+            background-color: var(--result-bg);
+            color: var(--result-text);
+            font-family: 'Courier New', Courier, monospace;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid var(--result-border);
+            white-space: pre-wrap;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-x: auto;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group-custom {
+            margin-bottom: 20px;
+        }
+
+        .input-group-custom label {
+            cursor: pointer;
+        }
+
+        input[type="date"] {
+            cursor: pointer;
+        }
+
+        input[type="date"]::placeholder {
+            color: transparent !important;
+            opacity: 0 !important;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 4px;
+        }
+
+        .content-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-container {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="content-wrapper">
+        <div class="container-fluid main-container">
+            <!-- Header with Theme Toggle -->
+            <div class="header-container">
+                <div class="header-title">
+                    <h1 style="font-size: 28px; font-weight: 700; margin: 0; color: var(--btn-primary);">
+                        <i class="fas fa-calculator" style="margin-right: 10px;"></i>VENKATESH INTEREST CALCULATION WEB APP
+                    </h1>
+                </div>
+                <div class="theme-toggle-container">
+                    <div class="theme-toggle">
+                        <button id="lightModeBtn" title="Light Mode" onclick="setTheme('light')">
+                            <i class="fas fa-sun"></i>
+                        </button>
+                        <button id="darkModeBtn" title="Dark Mode" onclick="setTheme('dark')">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Calculator Card -->
+            <div class="row justify-content-center">
+                <div class="col-lg-6 col-md-8 col-sm-10">
+                    <div class="card p-5">
+                        <div class="card-header-custom">
+                            <h2>Calculate Your Interest</h2>
+                            <p>Enter details below to generate a detailed breakdown</p>
+                        </div>
+
+                        <!-- Principal Amount Input -->
+                        <div class="input-group-custom">
+                            <label class="form-label">
+                                <i class="fas fa-coins" style="margin-right: 8px; color: var(--btn-primary);"></i>Principal Amount (₹)
+                            </label>
+                            <input type="text" id="principal" class="form-control" placeholder="Enter Amount" min="0">
+                        </div>
+
+                        <!-- Rate Input -->
+                        <div class="input-group-custom">
+                            <label class="form-label">
+                                <i class="fas fa-percent" style="margin-right: 8px; color: var(--btn-primary);"></i>Rate (₹ per 100/month)
+                            </label>
+                            <input type="text" id="rate" class="form-control" placeholder="Enter Rate (e.g., 1 or 2)" min="0">
+                        </div>
+
+                        <!-- Date Inputs -->
+                        <div class="form-row-custom">
+                            <div class="input-group-custom">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar-check" style="margin-right: 8px; color: var(--btn-primary);"></i>Start Date
+                                </label>
+                                <input type="date" id="startDate" class="form-control date-input">
+                            </div>
+                            <div class="input-group-custom">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar-times" style="margin-right: 8px; color: var(--btn-primary);"></i>End Date
+                                </label>
+                                <input type="date" id="endDate" class="form-control date-input">
+                            </div>
+                        </div>
+
+                        <!-- Calculate Button -->
+                        <button onclick="calculateInterest()" class="btn btn-primary w-100 py-3">
+                            <i class="fas fa-calculator" style="margin-right: 8px;"></i>GENERATE BREAKDOWN
+                        </button>
+
+                        <!-- Result Output -->
+                        <div id="output" class="result-box mt-4 d-none"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Format number with Indian comma system (1,00,000)
+        function formatIndianCurrency(num) {
+            if (!num) return '';
+            const numStr = num.toString().replace(/,/g, '');
+            if (isNaN(numStr)) return '';
+            
+            let x = numStr.split('.');
+            let intPart = x[0];
+            let decPart = x[1] ? '.' + x[1] : '';
+            
+            // Reverse for processing
+            intPart = intPart.split('').reverse().join('');
+            
+            let result = '';
+            for (let i = 0; i < intPart.length; i++) {
+                if (i === 3 || (i > 3 && (i - 3) % 2 === 0)) {
+                    result += ',';
+                }
+                result += intPart[i];
+            }
+            
+            // Reverse back
+            result = result.split('').reverse().join('');
+            return result + decPart;
+        }
+
+        // Get actual numeric value from formatted input
+        function getNumericValue(formattedNum) {
+            return formattedNum.toString().replace(/,/g, '');
+        }
+
+        // Add event listener to principal input for formatting
+        document.addEventListener('DOMContentLoaded', function() {
+            const principalInput = document.getElementById('principal');
+            const rateInput = document.getElementById('rate');
+            const dateInputs = document.querySelectorAll('.date-input');
+            
+            principalInput.addEventListener('input', function() {
+                const cursorPos = this.selectionStart;
+                const oldValue = this.value;
+                const numericValue = getNumericValue(oldValue);
+                const formattedValue = formatIndianCurrency(numericValue);
+                
+                this.value = formattedValue;
+                
+                // Adjust cursor position
+                const diff = formattedValue.length - oldValue.length;
+                this.selectionStart = cursorPos + diff;
+                this.selectionEnd = cursorPos + diff;
+            });
+
+            rateInput.addEventListener('input', function() {
+                const cursorPos = this.selectionStart;
+                const oldValue = this.value;
+                const numericValue = getNumericValue(oldValue);
+                
+                // Allow only numbers and one decimal point
+                if (numericValue && !isNaN(numericValue)) {
+                    this.value = numericValue;
+                } else {
+                    this.value = oldValue.replace(/[^0-9.]/g, '');
+                }
+            });
+
+            // Handle date input click behavior
+            dateInputs.forEach(input => {
+                // Open date picker on click
+                input.addEventListener('click', function() {
+                    this.showPicker();
+                });
+            });
+        });
+
+        // Initialize theme from localStorage
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            setTheme(savedTheme);
+        }
+
+        // Set theme
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+
+            // Update button states
+            const lightBtn = document.getElementById('lightModeBtn');
+            const darkBtn = document.getElementById('darkModeBtn');
+
+            if (theme === 'light') {
+                lightBtn.style.backgroundColor = 'var(--btn-primary)';
+                lightBtn.style.color = 'white';
+                darkBtn.style.backgroundColor = 'transparent';
+                darkBtn.style.color = 'var(--text-primary)';
+            } else {
+                darkBtn.style.backgroundColor = 'var(--btn-primary)';
+                darkBtn.style.color = 'white';
+                lightBtn.style.backgroundColor = 'transparent';
+                lightBtn.style.color = 'var(--text-primary)';
+            }
+        }
+
+        function calculateInterest() {
+            const principalFormatted = document.getElementById('principal').value;
+            const rateFormatted = document.getElementById('rate').value;
+            const p = parseFloat(getNumericValue(principalFormatted));
+            const r = parseFloat(getNumericValue(rateFormatted));
+            const start = new Date(document.getElementById('startDate').value);
+            const end = new Date(document.getElementById('endDate').value);
+
+            if (!p || !r || isNaN(start) || isNaN(end)) {
+                alert("Please fill all fields correctly.");
+                return;
+            }
+
+            if (end < start) {
+                alert("End date must be after start date.");
+                return;
+            }
+
+            // Logic using Months + Days
+            let years = end.getFullYear() - start.getFullYear();
+            let months = end.getMonth() - start.getMonth();
+            let days = end.getDate() - start.getDate();
+
+            if (days < 0) {
+                months -= 1;
+                const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+                days += prevMonth.getDate();
+            }
+            if (months < 0) {
+                years -= 1;
+                months += 12;
+            }
+
+            const totalMonths = (years * 12) + months;
+            const monthlyAmt = (p / 100) * r;
+            const dailyAmt = monthlyAmt / 30;
+
+            const totalInterest = (totalMonths * monthlyAmt) + (days * dailyAmt);
+
+            const formatter = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
+
+            const result = `
+╔═════════════════════════════════════╗
+║      FINANCIAL SUMMARY              ║
+╚═════════════════════════════════════╝
+
+Duration:   ${years} Year${years !== 1 ? 's' : ''}, ${months} Month${months !== 1 ? 's' : ''}, ${days} Day${days !== 1 ? 's' : ''}
+Time Units: ${totalMonths} Months + ${days} Days
+
+═════════════════════════════════════
+INTEREST RATE BREAKDOWN:
+Monthly Rate: ₹${monthlyAmt.toFixed(2)} per month
+Daily Rate:   ₹${dailyAmt.toFixed(2)} per day
+═════════════════════════════════════
+
+CALCULATION DETAILS:
+Months Interest: ${totalMonths} × ₹${monthlyAmt.toFixed(2)} = ${formatter.format(totalMonths * monthlyAmt)}
+Days Interest:   ${days} × ₹${dailyAmt.toFixed(2)} = ${formatter.format(days * dailyAmt)}
+
+═════════════════════════════════════
+  TOTAL INTEREST:  ${formatter.format(totalInterest)}
+  TOTAL PAYABLE:   ${formatter.format(p + totalInterest)}
+═════════════════════════════════════`;
+
+            const outputDiv = document.getElementById('output');
+            outputDiv.textContent = result;
+            outputDiv.classList.remove('d-none');
+            outputDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Initialize theme on page load
+        window.addEventListener('DOMContentLoaded', initializeTheme);
+    </script>
+</body>
+
+</html>
