@@ -311,8 +311,29 @@
                             <input type="text" id="rate" class="form-control" placeholder="Enter Rate (e.g., 1 or 2)" min="0">
                         </div>
 
+                        <!-- Calculation Mode Toggle -->
+                        <div class="input-group-custom" style="margin-bottom: 25px;">
+                            <label class="form-label">
+                                <i class="fas fa-sliders-h" style="margin-right: 8px; color: var(--btn-primary);"></i>Calculation Mode
+                            </label>
+                            <div style="display: flex; gap: 20px; margin-top: 10px;">
+                                <div>
+                                    <input type="radio" id="modeDate" name="calcMode" value="date" checked onchange="toggleCalculationMode()">
+                                    <label for="modeDate" style="margin: 0; font-weight: 500; cursor: pointer; color: var(--text-primary);">
+                                        <i class="fas fa-calendar" style="margin-right: 5px;"></i>By Dates
+                                    </label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="modeDays" name="calcMode" value="days" onchange="toggleCalculationMode()">
+                                    <label for="modeDays" style="margin: 0; font-weight: 500; cursor: pointer; color: var(--text-primary);">
+                                        <i class="fas fa-clock" style="margin-right: 5px;"></i>By Days
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Date Inputs -->
-                        <div class="form-row-custom">
+                        <div id="dateInputsSection" class="form-row-custom">
                             <div class="input-group-custom">
                                 <label class="form-label">
                                     <i class="fas fa-calendar-check" style="margin-right: 8px; color: var(--btn-primary);"></i>Start Date
@@ -327,9 +348,22 @@
                             </div>
                         </div>
 
+                        <!-- Days Input -->
+                        <div id="daysInputSection" class="input-group-custom" style="display: none; margin-bottom: 20px;">
+                            <label class="form-label">
+                                <i class="fas fa-hourglass-half" style="margin-right: 8px; color: var(--btn-primary);"></i>Number of Days
+                            </label>
+                            <input type="text" id="daysInput" class="form-control" placeholder="Enter number of days" min="0">
+                        </div>
+
                         <!-- Calculate Button -->
                         <button onclick="calculateInterest()" class="btn btn-primary w-100 py-3">
                             <i class="fas fa-calculator" style="margin-right: 8px;"></i>GENERATE BREAKDOWN
+                        </button>
+
+                        <!-- Clear Button -->
+                        <button onclick="clearForm()" class="btn btn-danger w-100 py-3" style="margin-top: 10px; background-color: #e74c3c; border: none; font-weight: 700; letter-spacing: 0.5px;">
+                            <i class="fas fa-redo" style="margin-right: 8px;"></i>CLEAR FORM
                         </button>
 
                         <!-- Result Output -->
@@ -376,12 +410,20 @@
         document.addEventListener('DOMContentLoaded', function() {
             const principalInput = document.getElementById('principal');
             const rateInput = document.getElementById('rate');
+            const daysInput = document.getElementById('daysInput');
             const dateInputs = document.querySelectorAll('.date-input');
             
             principalInput.addEventListener('input', function() {
                 const cursorPos = this.selectionStart;
                 const oldValue = this.value;
                 const numericValue = getNumericValue(oldValue);
+                
+                // Prevent negative numbers
+                if (numericValue.startsWith('-')) {
+                    this.value = numericValue.substring(1);
+                    return;
+                }
+                
                 const formattedValue = formatIndianCurrency(numericValue);
                 
                 this.value = formattedValue;
@@ -405,6 +447,21 @@
                 }
             });
 
+            daysInput.addEventListener('input', function() {
+                const cursorPos = this.selectionStart;
+                const oldValue = this.value;
+                const numericValue = getNumericValue(oldValue);
+                
+                // Prevent negative numbers - only allow positive integers
+                if (numericValue.startsWith('-')) {
+                    this.value = numericValue.substring(1);
+                    return;
+                }
+                
+                // Allow only integers
+                this.value = numericValue.replace(/[^0-9]/g, '');
+            });
+
             // Handle date input click behavior
             dateInputs.forEach(input => {
                 // Open date picker on click
@@ -413,6 +470,44 @@
                 });
             });
         });
+
+        // Toggle between Date and Days calculation mode
+        function toggleCalculationMode() {
+            const selectedMode = document.querySelector('input[name="calcMode"]:checked').value;
+            const dateInputsSection = document.getElementById('dateInputsSection');
+            const daysInputSection = document.getElementById('daysInputSection');
+            
+            if (selectedMode === 'date') {
+                dateInputsSection.style.display = 'grid';
+                daysInputSection.style.display = 'none';
+            } else {
+                dateInputsSection.style.display = 'none';
+                daysInputSection.style.display = 'block';
+            }
+        }
+
+        // Clear form and reset to initial state
+        function clearForm() {
+            // Reset all input fields
+            document.getElementById('principal').value = '';
+            document.getElementById('rate').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('daysInput').value = '';
+            
+            // Reset calculation mode to "By Dates"
+            document.getElementById('modeDate').checked = true;
+            document.getElementById('modeDays').checked = false;
+            
+            // Reset display sections
+            document.getElementById('dateInputsSection').style.display = 'grid';
+            document.getElementById('daysInputSection').style.display = 'none';
+            
+            // Hide result output
+            const outputDiv = document.getElementById('output');
+            outputDiv.classList.add('d-none');
+            outputDiv.textContent = '';
+        }
 
         // Initialize theme from localStorage
         function initializeTheme() {
@@ -447,49 +542,101 @@
             const rateFormatted = document.getElementById('rate').value;
             const p = parseFloat(getNumericValue(principalFormatted));
             const r = parseFloat(getNumericValue(rateFormatted));
-            const start = new Date(document.getElementById('startDate').value);
-            const end = new Date(document.getElementById('endDate').value);
+            
+            // Check if principal is negative
+            if (p < 0) {
+                alert("Principal amount cannot be negative.");
+                return;
+            }
 
-            if (!p || !r || isNaN(start) || isNaN(end)) {
+            const selectedMode = document.querySelector('input[name="calcMode"]:checked').value;
+            let totalDays = 0;
+            let years = 0;
+            let months = 0;
+            let days = 0;
+
+            if (selectedMode === 'date') {
+                // Date-based calculation
+                const start = new Date(document.getElementById('startDate').value);
+                const end = new Date(document.getElementById('endDate').value);
+
+                if (isNaN(start) || isNaN(end)) {
+                    alert("Please fill all date fields correctly.");
+                    return;
+                }
+
+                if (end < start) {
+                    alert("End date must be after start date.");
+                    return;
+                }
+
+                // Logic using Months + Days
+                years = end.getFullYear() - start.getFullYear();
+                months = end.getMonth() - start.getMonth();
+                days = end.getDate() - start.getDate();
+
+                if (days < 0) {
+                    months -= 1;
+                    const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+                    days += prevMonth.getDate();
+                }
+                if (months < 0) {
+                    years -= 1;
+                    months += 12;
+                }
+
+                totalDays = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1; // +1 to include start date
+
+            } else {
+                // Days-based calculation
+                const daysInputFormatted = document.getElementById('daysInput').value;
+                totalDays = parseInt(getNumericValue(daysInputFormatted));
+
+                if (!totalDays || isNaN(totalDays) || totalDays <= 0) {
+                    alert("Please enter a valid number of days.");
+                    return;
+                }
+
+                // Convert days to Years, Months, Days for display
+                years = Math.floor(totalDays / 365);
+                const remainingDaysAfterYears = totalDays % 365;
+                months = Math.floor(remainingDaysAfterYears / 30);
+                days = remainingDaysAfterYears % 30;
+            }
+
+            if (!p || !r) {
                 alert("Please fill all fields correctly.");
                 return;
             }
 
-            if (end < start) {
-                alert("End date must be after start date.");
-                return;
-            }
-
-            // Logic using Months + Days
-            let years = end.getFullYear() - start.getFullYear();
-            let months = end.getMonth() - start.getMonth();
-            let days = end.getDate() - start.getDate();
-
-            if (days < 0) {
-                months -= 1;
-                const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
-                days += prevMonth.getDate();
-            }
-            if (months < 0) {
-                years -= 1;
-                months += 12;
-            }
-
-            const totalMonths = (years * 12) + months;
             const monthlyAmt = (p / 100) * r;
             const dailyAmt = monthlyAmt / 30;
-
-            const totalInterest = (totalMonths * monthlyAmt) + (days * dailyAmt);
+            
+            // Calculate total interest based on total days
+            const totalMonths = Math.floor(totalDays / 30);
+            const remainingDays = totalDays % 30;
+            
+            const totalInterest = (totalMonths * monthlyAmt) + (remainingDays * dailyAmt);
 
             const formatter = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
+
+            const calculationMethod = selectedMode === 'date' ? 
+                `Start Date → End Date Calculation` : 
+                `Total Days Entered: ${totalDays}`;
+
+            // For days mode conversion
+            const daysConversionText = selectedMode !== 'date' ? 
+                `Converted Duration: ${years} Year${years !== 1 ? 's' : ''}, ${months} Month${months !== 1 ? 's' : ''}, ${days} Day${days !== 1 ? 's' : ''}` : 
+                '';
 
             const result = `
 ╔═════════════════════════════════════╗
 ║      FINANCIAL SUMMARY              ║
 ╚═════════════════════════════════════╝
 
-Duration:   ${years} Year${years !== 1 ? 's' : ''}, ${months} Month${months !== 1 ? 's' : ''}, ${days} Day${days !== 1 ? 's' : ''}
-Time Units: ${totalMonths} Months + ${days} Days
+Calculation Mode: ${selectedMode === 'date' ? 'By Dates' : 'By Days'}
+${calculationMethod}
+${selectedMode === 'date' ? `Duration: ${years} Year${years !== 1 ? 's' : ''}, ${months} Month${months !== 1 ? 's' : ''}, ${days} Day${days !== 1 ? 's' : ''}` : daysConversionText}
 
 ═════════════════════════════════════
 INTEREST RATE BREAKDOWN:
@@ -499,7 +646,7 @@ Daily Rate:   ₹${dailyAmt.toFixed(2)} per day
 
 CALCULATION DETAILS:
 Months Interest: ${totalMonths} × ₹${monthlyAmt.toFixed(2)} = ${formatter.format(totalMonths * monthlyAmt)}
-Days Interest:   ${days} × ₹${dailyAmt.toFixed(2)} = ${formatter.format(days * dailyAmt)}
+Days Interest:   ${remainingDays} × ₹${dailyAmt.toFixed(2)} = ${formatter.format(remainingDays * dailyAmt)}
 
 ═════════════════════════════════════
   TOTAL INTEREST:  ${formatter.format(totalInterest)}
